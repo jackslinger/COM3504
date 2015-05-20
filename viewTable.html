@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <title>Ajax form</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link href="application.css" rel="stylesheet">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script src="viewTable.js"></script>
+</head>
+
+<body>
+	<div class="container">
+
+	<h1>Database Test Page</h1>
+
+	<table class="table table-condensed" id="tweetTable" style="width:100%">
+	  <tr>
+	    <thead id="tableHead">
+	        
+	    </thead>
+	    <tbody id="tableBody">
+	        
+	    </tbody>    
+	  </tr>
+	</table>
+
+	<button id="populateButton">Populate Table</button>
+
+	</div>
+
+	<div class="contianer">
+
+		<form id="myForm", onsubmit="return false;">
+		    Keywords: <br>
+		    <input type="text" name="query" value="">
+		    <br>
+		    Since: <br>
+		    <input type="text" name="since" value="">
+		    <br>
+		    Source: <br>
+		    <input type="text" name="source" value="">
+		    <br>
+		    Latitude: <br>
+		    <input type="text" name="lat" value="">
+		    <br>
+		    Longitude: <br>
+		    <input type="text" name="long" value="">
+		    <br>
+		    <br>
+		    <button id="sendButton">Send Data</button>
+		</form>
+	</div>
+
+</body>
+
+</html>

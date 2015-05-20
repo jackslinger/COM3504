@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Ajax form</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link href="application.css" rel="stylesheet">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script src="search.js"></script>
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="queryInterface.html">Intelligent Web</a>
+    </div>
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="searchForm.html">1.a Tracking Discussions</a></li>
+            <li class="active"><a href="searchKeywords.html">2.a Topic Finder</a></li>
+            <li class="active"><a href="searchLocations.html">2.b Find Venues</a></li>
+            <li class="active"><a href="searchVisitors.html">2.c Find Visitors</a></li>
+            <li class="active"><a href="viewUser.html">View Users in Database</a></li>
+            <li class="active"><a href="viewVenue.html">View Venues in Database</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+<h1>Tracking Discussions</h1>
+
+<form id="myForm", onsubmit="return false;">
+    Keywords: <br>
+    <input id="keywordsInput" type="text" name="query" value="">
+    <br>
+    How many Days ago: <br>
+    <input id="daysInput" type="number" min="1" step="1" name="since" value="">
+    <br>
+    From: <br>
+    <input id="fromInput" type="text" name="from" value="">
+    <br>
+    Latitude: <br>
+    <input id="latInput" type="text" name="lat" value="">
+    <br>
+    Longitude: <br>
+    <input id="lonInput" type="text" name="long" value="">
+    <br>
+    <br>
+    <button id="sendButton">Send Data</button>
+</form>
+
+</div>
+<div class="container">
+
+<table class="table table-condensed" id="tweetTable" style="width:100%">
+  <tr>
+    <thead>
+        <th>Created at</th>
+        <th>Screen Name</th> 
+        <th>Text</th>
+        <th>Tweet ID</th>
+        <th>Retweets</th>
+    </thead>
+    <tbody id="tweetTableBody">
+        
+    </tbody>    
+  </tr>
+</table>
+
+</div>
+
+</body>
+
+</html>
