@@ -645,6 +645,7 @@ var app = protocol.createServer(function (req, res) {
             
             console.log("Find points of interest");
 
+            //Set the options for the foursquare call
             var options = {
                 url: 'https://api.foursquare.com/v2/venues/' + venueid,
                 method: 'GET',
@@ -653,11 +654,65 @@ var app = protocol.createServer(function (req, res) {
                 'v' :'20140806', m: 'swarm'}
             }
 
+            //make the foursquare call to get the checkin object
             request(options, function (error, response, body) {
                 if (!error && response.statusCode == 200) {
-                    // Print out the response body
-                    var raw = JSON.parse(body);
+                    var venue = JSON.parse(body).response.venue;
+                    
                     console.log("Got the checkin");
+                    console.log(venue.name);
+                    
+                    //Get the latitude and longitude from the checkin
+                    var lat = venue.location.lat;
+                    var lon = venue.location.lng;
+
+                    //Create the dbpedia sparqle query using the latidute and longidute
+                    var path = "/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=PREFIX+geo%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2003%2F01%2Fgeo%2Fwgs84_pos%23%3E%0D%0ASELECT+%3Fsubject+%3Flabel+%3Flat+%3Flong+WHERE+%7B%0D%0A%3Fsubject+geo%3Alat+%3Flat.%0D%0A%3Fsubject+geo%3Along+%3Flong.%0D%0A%3Fsubject+rdfs%3Alabel+%3Flabel.%0D%0AFILTER%28%0D%0Axsd%3Adouble%28%3Flat%29+-+xsd%3Adouble%28%22";
+                    path = path + lat;
+                    path = path + "%22%5E%5Exsd%3Afloat%29+%3C%3D+0.5+%26%26%0D%0Axsd%3Adouble%28%22";
+                    path = path + lat;
+                    path = path + "%22%5E%5Exsd%3Afloat%29+-+xsd%3Adouble%28%3Flat%29+%3C%3D+0.5+%26%26%0D%0Axsd%3Adouble%28%3Flong%29+-+xsd%3Adouble%28%22";
+                    path = path + lon;
+                    path = path + "%22%5E%5Exsd%3Afloat%29+%3C%3D+0.5+%26%26%0D%0Axsd%3Adouble%28%22";
+                    path = path + lon;
+                    path = path + "%22%5E%5Exsd%3Afloat%29+-+xsd%3Adouble%28%3Flong%29+%3C%3D+0.5+%26%26%0D%0Alang%28%3Flabel%29+%3D+%22en%22%0D%0A%29.%0D%0A%7D+LIMIT+20&format=application%2Fsparql-results%2Bjson&timeout=30000&debug=on";
+                    
+                    //Set the options for the call to dbpedia
+                    var options = {
+                      host: 'www.dbpedia.org',
+                      path: path
+                    };
+
+                    //Make a http get request to the address and give a callback function
+                    var dbp_req = protocol.get(options, function(dbp_res) {
+                      // Buffer the body entirely for processing as a whole.
+                      var bodyChunks = [];
+                      dbp_res.on('data', function(chunk) {
+                        // You can process streamed parts here...
+                        bodyChunks.push(chunk);
+                      }).on('end', function() {
+                        var body = Buffer.concat(bodyChunks);
+
+                        //Parse the json data recived
+                        var data = JSON.parse(body);
+
+                        var results = {};
+
+                        //Loop through the data adding it to results
+                        for (var index in data.results.bindings) {
+                          console.log(data.results.bindings[index].label.value);
+                          results[index] = (data.results.bindings[index]);
+                        }
+
+                        //Send the results
+                        res.end(JSON.stringify(results));
+                      })
+                    });
+
+                    dbp_req.on('error', function(e) {
+                      //Log a console message if an error occurs
+                      console.log('ERROR: ' + e.message);
+                    });
                 } else {
                     console.log('error: '+error + ' status: '+response.statusCode);
                 }
