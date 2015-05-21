@@ -16,9 +16,10 @@ function findPointsInterest(id) {
 	$.post('/findInterest.html', JSON.stringify({id: id}), function(data) {
         var venue = JSON.parse(data).venue;
         var venues = JSON.parse(data).venues;
+        var dbpedia = JSON.parse(data).dbpedia;
 
 		populateVenue(venue);
-        loadMap(venues);
+        loadMap(venues, dbpedia);
 	});
 }
 
@@ -57,7 +58,7 @@ function populateVenue(venue) {
         }
 }
 
-function loadMap(venues) {
+function loadMap(venues, dbpedia) {
   
     var map = new google.maps.Map(document.getElementById("map-canvas"));
     var markers = new Array();
@@ -71,12 +72,26 @@ function loadMap(venues) {
 
         boundary.extend(venueLatLng);
 
-        markers[index] = new google.maps.Marker({
+        markers.push(new google.maps.Marker({
             position: venueLatLng,
             map: map
-        });
+        }));
 
-        contentStrings[index] = venues[index].name;
+        contentStrings.push(venues[index].name);
+    }
+
+    for (var index in dbpedia) {
+        var location = dbpedia[index];
+        var latlng = new google.maps.LatLng(location.lat, location.lon);
+
+        boundary.extend(latlng);
+
+        markers.push(new google.maps.Marker({
+            position: latlng,
+            map: map
+        }));
+
+        contentStrings.push(location.link);
     }
 
     infowindow = new google.maps.InfoWindow({ content: "holding..." });
