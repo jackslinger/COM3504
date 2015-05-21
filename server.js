@@ -697,11 +697,11 @@ var app = protocol.createServer(function (req, res) {
                             var data = JSON.parse(body);
                             var bindings = data.results.bindings;
 
-                            var results = {};
+                            var jsonResults = {};
                             var dbpedia = {};
                             var venues = {};
 
-                            results.venue = venue;
+                            jsonResults.venue = venue;
 
                             //Loop through the data adding it to results
                             //Dbpedia will sometimes include results with different lat and long but the same link. These should be culled down to just one entry
@@ -718,7 +718,7 @@ var app = protocol.createServer(function (req, res) {
                                 dbpedia[index] = result;
                             }
 
-                            results.dbpedia = dbpedia;
+                            jsonResults.dbpedia = dbpedia;
 
                             //Set up ll for the forusqaure call
                             var ll = lat + "," + lon;
@@ -733,18 +733,30 @@ var app = protocol.createServer(function (req, res) {
                                 'v' :'20140806', m: 'swarm'}
                             }
 
-                            //Make a foursquare call
+                            //Make a foursquare call for the compact venues near the location given
                             request(options, function (error, response, body) {
                                 if (!error && response.statusCode == 200) {
-                                    venues = JSON.parse(body).response.venues;
+                                    var raw = JSON.parse(body).response.venues;
+                                    var requests = new Array()
+
+                                    for (var index in raw) {
+                                        //Add a request for the full object
+                                        requests.push(getFullVenue(raw[index].id));
+                                    }
+
+                                    //Wait untill all of the requests are done
+                                    async.parallel(requests, function(err, results) {
+                                        for (var index in results) {
+                                            venues[index] = results[index].response.venue;
+                                        }
+                                        jsonResults.venues = venues;
+
+                                        //Send the results
+                                        res.end(JSON.stringify(jsonResults));
+                                    });
                                 } else {
                                     console.log('error: '+error + ' status: '+response.statusCode);
                                 }
-
-                                results.venues = venues;
-
-                                //Send the results
-                                res.end(JSON.stringify(results));
                             });
                         });
                     });
