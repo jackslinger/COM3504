@@ -685,33 +685,42 @@ var app = protocol.createServer(function (req, res) {
 
                     //Make a http get request to the address and give a callback function
                     var dbp_req = protocol.get(options, function(dbp_res) {
-                      // Buffer the body entirely for processing as a whole.
-                      var bodyChunks = [];
-                      dbp_res.on('data', function(chunk) {
+                        // Buffer the body entirely for processing as a whole.
+                        var bodyChunks = [];
+                        dbp_res.on('data', function(chunk) {
                         // You can process streamed parts here...
                         bodyChunks.push(chunk);
-                      }).on('end', function() {
+                    }).on('end', function() {
                         var body = Buffer.concat(bodyChunks);
 
                         //Parse the json data recived
                         var data = JSON.parse(body);
+                        var bindings = data.results.bindings;
 
                         var results = {};
 
                         //Loop through the data adding it to results
-                        for (var index in data.results.bindings) {
-                          console.log(data.results.bindings[index].label.value);
-                          results[index] = (data.results.bindings[index]);
+                        //Dbpedia will sometimes include results with different lat and long but the same link. These should be culled down to just one entry
+                        for (var index in bindings) {
+                            var binding = bindings[index];
+
+                            var result = {};
+                            result.label = binding.label.value;
+                            result.lat = binding.lat.value;
+                            result.lon = binding.long.value;
+                            result.link = binding.subject.value;
+
+                            results[index] = result;
                         }
 
                         //Send the results
                         res.end(JSON.stringify(results));
-                      })
+                        })
                     });
 
                     dbp_req.on('error', function(e) {
-                      //Log a console message if an error occurs
-                      console.log('ERROR: ' + e.message);
+                        //Log a console message if an error occurs
+                        console.log('ERROR: ' + e.message);
                     });
                 } else {
                     console.log('error: '+error + ' status: '+response.statusCode);
