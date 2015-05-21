@@ -690,38 +690,63 @@ var app = protocol.createServer(function (req, res) {
                         dbp_res.on('data', function(chunk) {
                         // You can process streamed parts here...
                         bodyChunks.push(chunk);
-                    }).on('end', function() {
-                        var body = Buffer.concat(bodyChunks);
+                        }).on('end', function() {
+                            var body = Buffer.concat(bodyChunks);
 
-                        //Parse the json data recived
-                        var data = JSON.parse(body);
-                        var bindings = data.results.bindings;
+                            //Parse the json data recived
+                            var data = JSON.parse(body);
+                            var bindings = data.results.bindings;
 
-                        var results = {};
-                        var dbpedia = {};
+                            var results = {};
+                            var dbpedia = {};
+                            var venues = {};
 
-                        results.venue = venue;
+                            results.venue = venue;
 
-                        //Loop through the data adding it to results
-                        //Dbpedia will sometimes include results with different lat and long but the same link. These should be culled down to just one entry
-                        for (var index in bindings) {
-                            var binding = bindings[index];
+                            //Loop through the data adding it to results
+                            //Dbpedia will sometimes include results with different lat and long but the same link. These should be culled down to just one entry
+                            for (var index in bindings) {
+                                var binding = bindings[index];
 
-                            var result = {};
-                            result.label = binding.label.value;
-                            result.lat = binding.lat.value;
-                            result.lon = binding.long.value;
-                            var link = "http://en.wikipedia.org/?curid=" + binding.pageid.value;
-                            result.link = link;
+                                var result = {};
+                                result.label = binding.label.value;
+                                result.lat = binding.lat.value;
+                                result.lon = binding.long.value;
+                                var link = "http://en.wikipedia.org/?curid=" + binding.pageid.value;
+                                result.link = link;
 
-                            dbpedia[index] = result;
-                        }
+                                dbpedia[index] = result;
+                            }
 
-                        results.dbpedia = dbpedia;
+                            results.dbpedia = dbpedia;
 
-                        //Send the results
-                        res.end(JSON.stringify(results));
-                        })
+                            //Set up ll for the forusqaure call
+                            var ll = lat + "," + lon;
+                            var radius = 2000;
+
+                            //Set up the options for a foursquare call to find nearby venues
+                            var options = {
+                                url: 'https://api.foursquare.com/v2/venues/search',
+                                method: 'GET',
+                                headers: headers,
+                                qs: {'ll' : ll, 'radius' : radius, 'oauth_token' : 'ONYO0JUQTC1NBSE3IXRZ1A1NKSKQHJGFW1IB4JRDTBTH5ODY',
+                                'v' :'20140806', m: 'swarm'}
+                            }
+
+                            //Make a foursquare call
+                            request(options, function (error, response, body) {
+                                if (!error && response.statusCode == 200) {
+                                    venues = JSON.parse(body).response.venues;
+                                } else {
+                                    console.log('error: '+error + ' status: '+response.statusCode);
+                                }
+
+                                results.venues = venues;
+
+                                //Send the results
+                                res.end(JSON.stringify(results));
+                            });
+                        });
                     });
 
                     dbp_req.on('error', function(e) {
