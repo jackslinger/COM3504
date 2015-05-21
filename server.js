@@ -642,8 +642,6 @@ var app = protocol.createServer(function (req, res) {
             jsonData = JSON.parse(body);
 
             var venueid = jsonData.id;
-            
-            console.log("Find points of interest");
 
             //Set the options for the foursquare call
             var options = {
@@ -658,9 +656,6 @@ var app = protocol.createServer(function (req, res) {
             request(options, function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     var venue = JSON.parse(body).response.venue;
-                    
-                    console.log("Got the checkin");
-                    console.log(venue.name);
                     
                     //Get the latitude and longitude from the checkin
                     var lat = venue.location.lat;

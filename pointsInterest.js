@@ -77,7 +77,9 @@ function loadMap(venues, dbpedia) {
             map: map
         }));
 
-        contentStrings.push(venues[index].name);
+        var content = "<a href='" + venues[index].shortUrl + "' target='_blank'>" + venues[index].name + "</a>";
+
+        contentStrings.push(content);
     }
 
     for (var index in dbpedia) {
@@ -91,7 +93,9 @@ function loadMap(venues, dbpedia) {
             map: map
         }));
 
-        contentStrings.push(location.link);
+        var content = "<a href='" + location.link + "' target='_blank'>" + location.label + "</a>";
+
+        contentStrings.push(content);
     }
 
     infowindow = new google.maps.InfoWindow({ content: "holding..." });
