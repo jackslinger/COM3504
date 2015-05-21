@@ -83,6 +83,9 @@ function sendData() {
             } else {
                 row.insertCell(5).innerHTML = "No picture available";
             }
+
+            var interestLink = "<a href ='/pointsInterest.html?id=" + venue.id + "' target='_blank'>Show points of Interest</a>";
+            row.insertCell(6).innerHTML = interestLink;
         }
 
         
