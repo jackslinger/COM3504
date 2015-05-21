@@ -111,7 +111,6 @@ function findDate(days) {
 }
 
 function loadMap(venues) {
-    var myLatlng = new google.maps.LatLng(53.3797802509373, -1.4684861694359825);
   
     var map = new google.maps.Map(document.getElementById("map-canvas"));
     var markers = new Array();

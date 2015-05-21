@@ -14,8 +14,11 @@ $(document).ready(function() {
 function findPointsInterest(id) {
 	console.log("sending request");
 	$.post('/findInterest.html', JSON.stringify({id: id}), function(data) {
-		var venue = JSON.parse(data).venue;
+        var venue = JSON.parse(data).venue;
+        var venues = JSON.parse(data).venues;
+
 		populateVenue(venue);
+        loadMap(venues);
 	});
 }
 
@@ -52,6 +55,45 @@ function populateVenue(venue) {
         } else {
             row.insertCell(5).innerHTML = "No picture available";
         }
+}
+
+function loadMap(venues) {
+  
+    var map = new google.maps.Map(document.getElementById("map-canvas"));
+    var markers = new Array();
+    var contentStrings = new Array();
+    var boundary = new google.maps.LatLngBounds();
+
+
+    for (var index in venues) {
+        var venueLocation = venues[index].location;
+        var venueLatLng = new google.maps.LatLng(venueLocation.lat, venueLocation.lng);
+
+        boundary.extend(venueLatLng);
+
+        markers[index] = new google.maps.Marker({
+            position: venueLatLng,
+            map: map
+        });
+
+        contentStrings[index] = venues[index].name;
+    }
+
+    infowindow = new google.maps.InfoWindow({ content: "holding..." });
+
+    for (var index in markers) {
+        var marker = markers[index];
+
+        google.maps.event.addListener(marker, 'click',
+            (function(marker, index) {
+                return function() {
+                    infowindow.setContent(contentStrings[index]);
+                    infowindow.open(map, marker);
+                }
+            })(marker, index))
+    } 
+
+    map.fitBounds(boundary);
 }
 
 function findParams(queryString) {
