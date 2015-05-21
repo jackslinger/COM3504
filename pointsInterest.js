@@ -14,8 +14,44 @@ $(document).ready(function() {
 function findPointsInterest(id) {
 	console.log("sending request");
 	$.post('/findInterest.html', JSON.stringify({id: id}), function(data) {
-		console.log(data);
+		var venue = JSON.parse(data).venue;
+		populateVenue(venue);
 	});
+}
+
+function populateVenue(venue) {       
+        var tableBody = document.getElementById("venueTableBody");
+        var row = tableBody.insertRow(0);
+        
+        row.insertCell(0).innerHTML = venue.name;
+
+        if (venue.categories.length > 0) {
+        	row.insertCell(1).innerHTML = venue.categories[0].name;
+        } else {
+        	row.insertCell(1).innerHTML = "No category available";
+        }
+        
+        if (venue.location.formattedAddress != null) {
+            var address = "";
+            for (var part in venue.location.formattedAddress) {
+                address = address + venue.location.formattedAddress[part];
+            }
+            row.insertCell(2).innerHTML = address;
+        } else {
+            row.insertCell(2).innerHTML = "No address available";
+        }
+
+        row.insertCell(3).innerHTML = venue.description;
+
+        var link = "<a href='" + venue.shortUrl + "'>" + venue.shortUrl + "</a>";
+        row.insertCell(4).innerHTML = link;
+
+        if (venue.bestPhoto != null) {
+            var pic = "<img src=\"" + venue.bestPhoto.prefix + "width150" + venue.bestPhoto.suffix + "\">";
+            row.insertCell(5).innerHTML = pic;
+        } else {
+            row.insertCell(5).innerHTML = "No picture available";
+        }
 }
 
 function findParams(queryString) {

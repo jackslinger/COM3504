@@ -698,6 +698,9 @@ var app = protocol.createServer(function (req, res) {
                         var bindings = data.results.bindings;
 
                         var results = {};
+                        var dbpedia = {};
+
+                        results.venue = venue;
 
                         //Loop through the data adding it to results
                         //Dbpedia will sometimes include results with different lat and long but the same link. These should be culled down to just one entry
@@ -711,8 +714,10 @@ var app = protocol.createServer(function (req, res) {
                             var link = "http://en.wikipedia.org/?curid=" + binding.pageid.value;
                             result.link = link;
 
-                            results[index] = result;
+                            dbpedia[index] = result;
                         }
+
+                        results.dbpedia = dbpedia;
 
                         //Send the results
                         res.end(JSON.stringify(results));
