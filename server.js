@@ -640,8 +640,28 @@ var app = protocol.createServer(function (req, res) {
         });
         req.on('end', function () {
             jsonData = JSON.parse(body);
+
+            var venueid = jsonData.id;
             
             console.log("Find points of interest");
+
+            var options = {
+                url: 'https://api.foursquare.com/v2/venues/' + venueid,
+                method: 'GET',
+                headers: headers,
+                qs: {'VENUE_ID' : venueid, 'oauth_token' : 'ONYO0JUQTC1NBSE3IXRZ1A1NKSKQHJGFW1IB4JRDTBTH5ODY',
+                'v' :'20140806', m: 'swarm'}
+            }
+
+            request(options, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    // Print out the response body
+                    var raw = JSON.parse(body);
+                    console.log("Got the checkin");
+                } else {
+                    console.log('error: '+error + ' status: '+response.statusCode);
+                }
+            });
 
             res.writeHead(200, {"Content-Type": "text/plain"});
         });
