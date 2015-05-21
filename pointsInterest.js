@@ -5,10 +5,18 @@ $(document).ready(function() {
 	if (queryString.id != null) {
 		var id = queryString.id;
 		console.log(id);
+		findPointsInterest(id);
 	} else {
 		console.log("No ID Provided");
 	}
 });
+
+function findPointsInterest(id) {
+	console.log("sending request");
+	$.post('/findInterest.html', JSON.stringify({id: id}), function(data) {
+		console.log(data);
+	});
+}
 
 function findParams(queryString) {
 	if (window.location.search.split('?').length > 1) {

@@ -625,6 +625,26 @@ var app = protocol.createServer(function (req, res) {
 
             res.writeHead(200, {"Content-Type": "text/plain"});
         });
+    } else if((req.method == 'POST') && (pathname == '/findInterest.html')) {
+        var body = '';
+        req.on('data', function (data) {
+            body += data;
+            // if body >  1e6 === 1 * Math.pow(10, 6) ~~~ 1MB
+            // flood attack or faulty client
+            // (code 413: req entity too large), kill req
+            if (body.length > 1e6) {
+                res.writeHead(413,
+                    {'Content-Type': 'text/plain'}).end();
+                req.connection.destroy();
+            }
+        });
+        req.on('end', function () {
+            jsonData = JSON.parse(body);
+            
+            console.log("Find points of interest");
+
+            res.writeHead(200, {"Content-Type": "text/plain"});
+        });
     } else {
         file.serve(req, res, function (err, result) {
             if (err != null) {
@@ -886,9 +906,9 @@ function storeRetweetData(retweetData) {
     }
 }
 
-function queryUser(name) {
+//function queryUser(name) {
 
-}
+//}
 
 function queryUserVisit(screen_name) {
     var query = "SELECT user_id, name FROM visit ";
