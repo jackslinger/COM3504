@@ -10,9 +10,22 @@ function sendData() {
 
 	//Get data from form
 	var screenName = $('#screenNameInput').val();
-    var days = parseInt($('#daysInput').val());
+    var daysInput = $('#daysInput').val();
+    var days = parseInt(daysInput);
 
-    //Validate and process the input
+    //Validate the input
+    if (screenName == "") {
+        alert("Please enter a twitter screen name");
+        $("#screenNameInput").focus();
+        return false;
+    }
+    if (daysInput == "") {
+        alert("Please provide a number of Days!");
+        $("#daysInput").focus();
+        return false;
+    }
+
+    //Process the input ready to send
     var since = findDate(days);
     var query = {screenname: screenName, since: since};
 
