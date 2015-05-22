@@ -40,7 +40,13 @@
 
 <h1>Topic Finder</h1>
 
-<p>Please enter the screen names of twitter users with out the @ and with a single space between them.</p>
+<p>This page allows you to enter the screen names of several twitter users and find the topics that their tweets have in common
+over a given number of days ago. Enter the twitter screen names seperated by spaces and provide the number of keywords to display
+and the number of days to look back over.</p>
+
+<p>The system works by first sending a request to twitter to validate that the screen names given are correct. Provided that they
+are a request is sent for each screen name and their tweets are retrieved, these tweets are then fed thorugh a regular expresion and
+stop list to filter only the interesting keywords.</p>
 
 <form id="myForm", onsubmit="return false;">
     Screen Names: <br>

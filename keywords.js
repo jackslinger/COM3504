@@ -14,7 +14,7 @@ $(document).ready(function() {
 				"although","always","am","among", "amongst", "amoungst", "amount",  "an", "and", "another", "any","anyhow","anyone","anything","anyway",
 				"anywhere", "are", "around", "as",  "at", "back","be","became", "because","become","becomes", "becoming", "been", "before", "beforehand",
 				"behind", "being", "below", "beside", "besides", "between", "beyond", "bill", "both", "bottom","but", "by", "call", "can", "cannot", "cant",
-				"co", "con", "could", "couldnt", "cry", "de", "describe", "detail", "do", "done", "down", "due", "during", "each", "eg", "eight", "either",
+				"co", "con", "could", "couldnt", "cry", "d", "de", "describe", "detail", "do", "done", "down", "due", "during", "each", "eg", "eight", "either",
 				"eleven","else", "elsewhere", "empty", "enough", "etc", "even", "ever", "every", "everyone", "everything", "everywhere", "except", "few",
 				"fifteen", "fify", "fill", "find", "fire", "first", "five", "for", "former", "formerly", "forty", "found", "four", "from", "front", "full",
 				"further", "get", "give", "go", "had", "has", "hasnt", "have", "he", "hence", "her", "here", "hereafter", "hereby", "herein", "hereupon", "hers",
@@ -23,7 +23,7 @@ $(document).ready(function() {
 				"more", "moreover", "most", "mostly", "move", "much", "must", "my", "myself", "name", "namely", "neither", "never", "nevertheless", "next",
 				"nine", "no", "nobody", "none", "noone", "nor", "not", "nothing", "now", "nowhere", "of", "off", "often", "on", "once", "one", "only", "onto",
 				"or", "other", "others", "otherwise", "our", "ours", "ourselves", "out", "over", "own","part", "per", "perhaps", "please", "put", "rather", "re",
-				"same", "see", "seem", "seemed", "seeming", "seems", "serious", "several", "she", "should", "show", "side", "since", "sincere", "six", "sixty",
+				"s", "same", "see", "seem", "seemed", "seeming", "seems", "serious", "several", "she", "should", "show", "side", "since", "sincere", "six", "sixty",
 				"so", "some", "somehow", "someone", "something", "sometime", "sometimes", "somewhere", "still", "such", "system", "take", "ten", "than", "that",
 				"the", "their", "them", "themselves", "then", "thence", "there", "thereafter", "thereby", "therefore", "therein", "thereupon", "these", "they",
 				"thickv", "thin", "third", "this", "those", "though", "three", "through", "throughout", "thru", "thus", "to", "together", "too", "top", "toward",
@@ -58,11 +58,30 @@ function validateInput() {
     wordCount["total"] = {};
 
     //Get values from the form
-    numOfKeywords = parseInt($('#keywordsInput').val());
+    var keywordsInput = $('#keywordsInput').val();
+    numOfKeywords = parseInt(keywordsInput);
     var screenNames = $('#screenNamesInput').val();
-    var days = parseInt($('#daysInput').val());
+    var daysInput = $('#daysInput').val();
+    var days = parseInt(daysInput);
     
-    //Process and valididate the input
+    //Validate the input
+    if (screenNames == "") {
+        alert("Please provide twitter screen names seperated by a single space!");
+        $("#screenNamesInput").focus();
+        return false;
+    }
+    if (keywordsInput == "") {
+        alert("Please provide a number of keywords!");
+        $("#keywordsInput").focus();
+        return false;
+    }
+    if (daysInput == "") {
+        alert("Please provide a number of Days!");
+        $("#daysInput").focus();
+        return false;
+    }
+
+    //Process the input ready to send
     since = findDate(days);
     names = screenNames.split(" ");
 
@@ -144,13 +163,6 @@ function sendData() {
     row = row + "</tr>";
 
     tableHead.append(row);
-
-    // for (var i = keywords.length - 1; i >= 0; i--) {
-        
-    //     var row = tableBody.insertRow(0);
-    //     row.insertCell(0).innerHTML = keywords[i].key;
-    //     row.insertCell(1).innerHTML = keywords[i].value;
-    // }
 }
 
 function getSearchRequest(screen_name, numOfKeywords, since) {
@@ -228,7 +240,7 @@ function checkUser(screen_name) {
             validUsers.push(screen_name);
         },
         error: function(xhr, statusText, err) {
-            alert(err);
+            alert(screen_name + " is not a valid twitter screen name!");
         }
     });
 }

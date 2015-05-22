@@ -124,15 +124,13 @@ var app = protocol.createServer(function (req, res) {
 
             var query = "from:" + formData.screenname;
 
+            //Construct a query to get 100 of the given users tweets
             query = query + " since:" + formData.since;
-
-            console.log(query);
-
-            var tweetsJSON = '';
 
             client.get('search/tweets', { q: query, lang: 'en', lat: formData.lat, long: formData.long, count: 100 },
             function(err, data, response) {          
-                tweetsJSON = JSON.stringify(data);
+                var tweetsJSON = JSON.stringify(data);
+                //Return the tweets to the client
                 res.end(tweetsJSON);
             });
 
@@ -152,16 +150,16 @@ var app = protocol.createServer(function (req, res) {
             }
         });
         req.on('end', function () {
-            console.log(body);
-
-
+            //Send a request to get the twitter info about a given screen name
             client.get('users/show', { screen_name: body },
             function(err, data, response) {
                 if (err != null) {
-                    console.log(err);
+                    //If there is an error assume the screen name was wrong
+                    //Send a http code of 400 to indicate that the input was incorrect
                     res.writeHead(400);
                     res.end();
                 } else {
+                    //Send the JSON data about that user
                     tweetsJSON = JSON.stringify(data);
                     res.writeHead(200, {"Content-Type": "text/plain"});
                     res.end(tweetsJSON);
