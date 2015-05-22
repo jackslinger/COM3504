@@ -5,7 +5,12 @@ $(document).ready(function() {
 function sendData() {
 	var name = $("#nameInput").val();
 
-	console.log(name);
+	//Validate input
+	if (name == "") {
+		alert("Please enter the name or screen name of a twitter user!");
+		$("#nameInput").focus();
+		return false;
+	}
 
 	$("#userTableBody tr").remove();
 	$("#venueTableBody tr").remove();
@@ -14,6 +19,13 @@ function sendData() {
 	$.post('/queryUser.html', JSON.stringify({name: name}), function(data) {
         var data = JSON.parse(data);
         var user = data.user;
+        
+        //If user is empty then there is no user with that name in the database
+        if ($.isEmptyObject(user)) {
+        	alert("No user with that name in database.");
+        	return false;
+        }
+
         var venues = data.venues;
         var retweeters = data.retweeters;
 

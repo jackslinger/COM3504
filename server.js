@@ -504,6 +504,15 @@ var app = protocol.createServer(function (req, res) {
                             user[field] = rows[0][field];
                         }
                         data["user"] = user;
+                    } else {
+                        //No user found so set the data to empty objects
+                        data["user"] = {};
+                        data["venues"] = {};
+                        data["retweeters"] = {};
+                        //Send the data
+                        res.writeHead(200, {"Content-Type": "text/plain"});
+                        res.end(JSON.stringify(data));
+                        return false;
                     }
 
                     // var visits = {};
