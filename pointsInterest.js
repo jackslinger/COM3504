@@ -74,7 +74,8 @@ function loadMap(venues, dbpedia) {
 
         markers.push(new google.maps.Marker({
             position: venueLatLng,
-            map: map
+            map: map,
+            icon: "http://maps.google.com/mapfiles/ms/icons/blue.png"
         }));
 
         var content = "<a href='" + venues[index].shortUrl + "' target='_blank'>" + venues[index].name + "</a>";
@@ -90,7 +91,8 @@ function loadMap(venues, dbpedia) {
 
         markers.push(new google.maps.Marker({
             position: latlng,
-            map: map
+            map: map,
+            icon: "http://maps.google.com/mapfiles/ms/icons/green.png"
         }));
 
         var content = "<a href='" + location.link + "' target='_blank'>" + location.label + "</a>";
