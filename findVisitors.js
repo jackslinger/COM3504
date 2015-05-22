@@ -14,7 +14,7 @@ function sendData() {
 
 	//Validate and process the input
     var since = findDate(days);
-    var query = {location: location, lat: lat, lon: lon, since: since};
+    var query = {location: location, lat: lat, lon: lon, since: since, days: days};
 
     console.log(location);
     console.log(query);

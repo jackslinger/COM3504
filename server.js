@@ -262,94 +262,207 @@ var app = protocol.createServer(function (req, res) {
             
             var query = "  from:" + formData.screenname + " source:foursquare since:" + formData.since + " -filter:retweets";
 
-            console.log(query);
+            console.log(formData.days);
+            if (formData.days == 0) {
+                var io = require('socket.io').listen(app);
 
-            var tweetsJSON = '';
-
-            client.get('search/tweets', { q: query, lang: 'en', count: 10 },
-            function(err, data, response) {          
-                tweetsJSON = JSON.stringify(data);
-
-                var checkinRequests = new Array();
-
-                for (var index in data.statuses) {
-
-                    // Cycles through all urls within a tweet and checks if they are a valid swarm checkin url
-                    for (var index2 in data.statuses[index].entities.urls) {
-                        var swarmUrl=data.statuses[index].entities.urls[index2].display_url;
-
-                        var testUrl = (swarmUrl.substring(0,15));
-
-                        if (testUrl == "swarmapp.com/c/") {
-                            var swarmCode = swarmUrl.substring(15, 26);
-
-                            checkinRequests.push(getCheckin(swarmCode));
-                        }
-                    }
-                }
-
-                async.parallel(checkinRequests, function(err, results) {
-                    var venueRequests = new Array();
-
-                    for (var i in results) {
-                        var venueID = results[i].response.checkin.venue.id;
-                        venueRequests.push(getFullVenue(venueID));
-                    }
-
-                    async.parallel(venueRequests, function(err, results) {
-                        //Loop through the venues that have been returned and save them to the database
-                        for (var index in results) {
-                            var venue = results[index].response.venue;
-                            var stored = {};
-
-                            var address = "";
-                            for (var i in venue.location.formattedAddress) {
-                                address = address + venue.location.formattedAddress[i];
-                            }
-
-                            stored.id = venue.id;
-                            stored.name = venue.name;
-
-                            if (venue.bestPhoto != null) {
-                                stored.picture_url = venue.bestPhoto.prefix + "width150" + venue.bestPhoto.suffix;
-                            }
-
-                            stored.category = venue.categories[0].name;
-                            stored.url = venue.shortUrl;
-                            stored.description = venue.description;
-                            stored.address = address;
-
-                            storeVenueData(stored);
-
-                            //Store the user
-                            var userData = {};
-                            var user = data.statuses[0].user;
-
-                            userData.screen_name = user.screen_name;
-                            userData.name = user.name;
-                            userData.location = user.location;
-                            userData.picture_url = user.profile_image_url;
-                            userData.description = user.description;
-
-                            storeUserData(userData);
+                console.log("Connecting");
+                console.log(formData.screenname)
 
 
-                            //Store the data visit data as well
-                            var visitData = {};
+                io.on('connection', function (socket) {
+                  console.log('Connected');
 
-                            visitData.user_id = formData.screenname;
-                            visitData.venue_id = venue.id;
+                  client.get('users/show', { screen_name: formData.screenname, lang: 'en', count: 10 },
+                      function(err, data, response) { 
+                          var userID = data.id
 
-                            storeVisitData(visitData);
-                        }
+                          // stream built using the userID
+                          var stream = client.stream('statuses/filter', {follow: userID, language: 'en'})
 
-                        console.log(formData.screenname);
+                          stream.on('tweet', function (tweet) {
+                              // Only shows tweets which originate from foursquare
+                              if (tweet.source.split(/"/)[1] == "http://foursquare.com") {
 
-                        res.end(JSON.stringify(results));
-                    });
-                    
+                                  for (var index in tweet.entities.urls) {
+
+                                      var swarmUrl=tweet.entities.urls[index].display_url
+
+                                      var testUrl = (swarmUrl.substring(0,15));
+
+                                      if (testUrl == "swarmapp.com/c/") {
+
+                                          var swarmCode = swarmUrl.substring(15, 26);
+
+                                          var options = {
+                                              url: 'https://api.foursquare.com/v2/checkins/resolve',
+                                              method: 'GET',
+                                              headers: headers,
+                                              qs: {'shortId' : swarmCode, 'oauth_token' : 'ONYO0JUQTC1NBSE3IXRZ1A1NKSKQHJGFW1IB4JRDTBTH5ODY',
+                                              'v' :'20140806', m: 'swarm'}
+                                          }
+
+                                          request(options,
+                                              function (error, response, body) {
+                                                  if (!error && response.statusCode == 200) {
+                                                      // Print out the response body
+                                                      var raw = JSON.parse(body);
+
+                                                      var venue = raw.response.checkin.venue;
+
+                                                      var venueid = venue.id;
+
+                                                      var name = venue.name;
+                                                      var cat = venue.categories[0].name;
+                                                      var address = "";
+                                                      if (venue.location.formattedAddress != null) {
+                                                        address = venue.location.formattedAddress[0];
+                                                      } else {
+                                                        address = "No address available";
+                                                      }
+
+                                                      var options = {
+                                                            url: 'https://api.foursquare.com/v2/venues/' + venueid,
+                                                            method: 'GET',
+                                                            headers: headers,
+                                                            qs: {'VENUE_ID' : venueid, 'oauth_token' : 'ONYO0JUQTC1NBSE3IXRZ1A1NKSKQHJGFW1IB4JRDTBTH5ODY',
+                                                            'v' :'20140806', m: 'swarm'}
+                                                        }
+
+                                                        request(options,
+                                                            function (error, response, body) {
+                                                                if (!error && response.statusCode == 200) {
+                                                                    // Print out the response body
+                                                                    var raw = JSON.parse(body);
+
+                                                                    var fullvenue = raw.response.venue;
+
+                                                                    var description = fullvenue.description;
+
+                                                                    if (description == null) {
+                                                                        description = "No description available";
+                                                                    }
+
+                                                                    var url = "<a href='" + fullvenue.shortUrl + "'>" + fullvenue.shortUrl + "</a>";
+                                                                    var pic = "";
+
+                                                                    if (fullvenue.bestPhoto != null) {
+                                                                        pic = "<img src=\"" + fullvenue.bestPhoto.prefix + "width150" + fullvenue.bestPhoto.suffix + "\">";
+                                                                    } else {
+                                                                        pic = "No picture available";
+                                                                    }
+
+                                                                    var venuelat = fullvenue.location.lat;
+                                                                    var venuelng = fullvenue.location.lng;
+                                                                    var venuelatlng = venuelat+","+venuelng
+
+                                                                    var row = "<tr><td>"+name+"</td><td>"+cat+"</td><td>"+address+"</td><td>"+description+"</td><td>"+url+"</td><td>"+pic+"</td></tr>"
+                                                                    socket.emit('stream', row);
+                                                                }
+                                                                else console.log('error: '+error + ' status: '+response.statusCode);
+                                                      });
+
+
+                                                      
+                                                  }
+                                                  else console.log('error: '+error + ' status: '+response.statusCode);
+                                          })
+                                      }
+                                  }
+
+                              }
+                          })
+                      });
                 });
-            });
+            } else {
+
+                var tweetsJSON = '';
+
+                client.get('search/tweets', { q: query, lang: 'en', count: 10 },
+                function(err, data, response) {          
+                    tweetsJSON = JSON.stringify(data);
+
+                    var checkinRequests = new Array();
+
+                    for (var index in data.statuses) {
+
+                        // Cycles through all urls within a tweet and checks if they are a valid swarm checkin url
+                        for (var index2 in data.statuses[index].entities.urls) {
+                            var swarmUrl=data.statuses[index].entities.urls[index2].display_url;
+
+                            var testUrl = (swarmUrl.substring(0,15));
+
+                            if (testUrl == "swarmapp.com/c/") {
+                                var swarmCode = swarmUrl.substring(15, 26);
+
+                                checkinRequests.push(getCheckin(swarmCode));
+                            }
+                        }
+                    }
+
+                    async.parallel(checkinRequests, function(err, results) {
+                        var venueRequests = new Array();
+
+                        for (var i in results) {
+                            var venueID = results[i].response.checkin.venue.id;
+                            venueRequests.push(getFullVenue(venueID));
+                        }
+
+                        async.parallel(venueRequests, function(err, results) {
+                            //Loop through the venues that have been returned and save them to the database
+                            for (var index in results) {
+                                var venue = results[index].response.venue;
+                                var stored = {};
+
+                                var address = "";
+                                for (var i in venue.location.formattedAddress) {
+                                    address = address + venue.location.formattedAddress[i];
+                                }
+
+                                stored.id = venue.id;
+                                stored.name = venue.name;
+
+                                if (venue.bestPhoto != null) {
+                                    stored.picture_url = venue.bestPhoto.prefix + "width150" + venue.bestPhoto.suffix;
+                                }
+
+                                stored.category = venue.categories[0].name;
+                                stored.url = venue.shortUrl;
+                                stored.description = venue.description;
+                                stored.address = address;
+
+                                storeVenueData(stored);
+
+                                //Store the user
+                                var userData = {};
+                                var user = data.statuses[0].user;
+
+                                userData.screen_name = user.screen_name;
+                                userData.name = user.name;
+                                userData.location = user.location;
+                                userData.picture_url = user.profile_image_url;
+                                userData.description = user.description;
+
+                                storeUserData(userData);
+
+
+                                //Store the data visit data as well
+                                var visitData = {};
+
+                                visitData.user_id = formData.screenname;
+                                visitData.venue_id = venue.id;
+
+                                storeVisitData(visitData);
+                            }
+
+                            console.log(formData.screenname);
+
+                            res.end(JSON.stringify(results));
+                        });
+                        
+                    });
+                });
+            }
 
             res.writeHead(200, {"Content-Type": "text/plain"});
         });
@@ -373,52 +486,101 @@ var app = protocol.createServer(function (req, res) {
             
             var query = formData.location + " source:foursquare since:" + formData.since + " -filter:retweets";
             var geocode = formData.lat + "," + formData.lon + ",20mi"
-            var params = { q: query, lang: 'en', count: 10 };
+            
+            if (formData.days == 0) {
+                var io = require('socket.io').listen(app);
 
-            if (formData.lat != "" && formData.lon != "" && formData.location == "") {
-                params = { q: query, geocode: geocode, lang: 'en', count: 10 };
-            }
+                console.log("Connecting");
 
-            client.get('search/tweets', params,
-            function(err, data, response) {          
+                io.on('connection', function (socket) {
+                    console.log("Connected")
 
-                var tweets = data.statuses;
-                
-                var users = {};
-                var requests = new Array();
+                    var stream = "";
+                    var location = '';
 
-                //Loop through screen names of the tweets removing duplicates
-                //For each unique screen name send a request to get user infomation
-                for (var index in tweets) {
-                    var screenname = tweets[index].user.screen_name;
+                    if (formData.lat != "" && formData.lon != "") {
+                        lonFloat = parseFloat(formData.lon);
+                        latFloat = parseFloat(formData.lat);
 
-                    if (!(screenname in users)) {
-                        //console.log(screenname);
-                        users[screenname] = true;
-                        requests.push(getUser(screenname));
+                        location = (lonFloat-1) + "," + (latFloat-1) + "," + (lonFloat+1) + "," + (latFloat+1)
+
+                        console.log(location);
+
+                        stream = client.stream('statuses/filter', {locations: location, language: 'en'})
+                    } else {
+                        stream = client.stream('statuses/filter', {track: formData.location, language: 'en'})
                     }
+
+                    stream.on('tweet', function (tweet) {
+                        // Only shows tweets which originate from foursquare
+                        if (tweet.source.split(/"/)[1] == "http://foursquare.com") {
+
+                            var image = "<img src='" + tweet.user.profile_image_url + "'>";
+                            var name = tweet.user.name;
+                            var screenname = tweet.user.screen_name;
+                            var location = tweet.user.location;
+                            var description = tweet.user.description;
+                            var tweets = "<a href='timeline.html?screenname=" + screenname + "'>Timeline</a>";
+
+                            if (description == null ) {
+                                description = "No description available";
+                            }
+
+                            var row = "<tr><td>"+image+"</td><td>"+name+"</td><td>"+screenname+"</td><td>"+location+"</td><td>"+description+"</td><td>"+tweets+"</td></tr>"
+                            socket.emit('stream', row);
+
+                        }
+                    });
+                });
+            } else {
+
+                var params = { q: query, lang: 'en', count: 10 };
+
+                if (formData.lat != "" && formData.lon != "" && formData.location == "") {
+                    params = { q: query, geocode: geocode, lang: 'en', count: 10 };
                 }
 
-                async.parallel(requests, function(err, results) {
+                client.get('search/tweets', params,
+                function(err, data, response) {          
 
-                    //Loop through the users that have been returned and save them to the database
-                    for (var index in results) {
-                        var user = results[index];
-                        var stored = {};
+                    var tweets = data.statuses;
+                    
+                    var users = {};
+                    var requests = new Array();
 
-                        stored.screen_name = user.screen_name;
-                        stored.name = user.name;
-                        stored.location = user.location;
-                        stored.picture_url = user.profile_image_url;
-                        stored.description = user.description;
+                    //Loop through screen names of the tweets removing duplicates
+                    //For each unique screen name send a request to get user infomation
+                    for (var index in tweets) {
+                        var screenname = tweets[index].user.screen_name;
 
-                        storeUserData(stored);
+                        if (!(screenname in users)) {
+                            //console.log(screenname);
+                            users[screenname] = true;
+                            requests.push(getUser(screenname));
+                        }
                     }
 
-                    res.end(JSON.stringify(results));
-                });
+                    async.parallel(requests, function(err, results) {
 
-            });
+                        //Loop through the users that have been returned and save them to the database
+                        for (var index in results) {
+                            var user = results[index];
+                            var stored = {};
+
+                            stored.screen_name = user.screen_name;
+                            stored.name = user.name;
+                            stored.location = user.location;
+                            stored.picture_url = user.profile_image_url;
+                            stored.description = user.description;
+
+                            storeUserData(stored);
+                        }
+
+                        res.end(JSON.stringify(results));
+                    });
+
+                });
+            }
 
             res.writeHead(200, {"Content-Type": "text/plain"});
         });

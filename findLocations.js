@@ -27,7 +27,7 @@ function sendData() {
 
     //Process the input ready to send
     var since = findDate(days);
-    var query = {screenname: screenName, since: since};
+    var query = {screenname: screenName, since: since, days: days};
 
 	$.post("findLocations.html", JSON.stringify(query), function(data) {
 		//console.log(data);
