@@ -5,7 +5,12 @@ $(document).ready(function() {
 function sendData() {
 	var name = $("#nameInput").val();
 
-	console.log(name);
+	//Validate input
+	if (name == "") {
+		alert("Please enter the name of a foursquare venue!");
+		$("#nameInput").focus();
+		return false;
+	}
 
 	$("#userTableBody tr").remove();
 	$("#venueTableBody tr").remove();
@@ -14,6 +19,12 @@ function sendData() {
 		var data = JSON.parse(data);
 		var venue = data.venue;
 		var users = data.users;
+
+		//If venue is empty then it is not in the database
+		if ($.isEmptyObject(venue)) {
+			alert("No venue with that name in database.");
+        	return false;
+		}
 
 		var tableBody = document.getElementById("venueTableBody");
         var row = tableBody.insertRow(0);
