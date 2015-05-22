@@ -12,12 +12,25 @@ function sendData() {
     var from = $("#fromInput").val();
     var lat = $("#latInput").val();
     var lon = $("#lonInput").val();
-    var days = parseInt($("#daysInput").val());
+    var daysInput = $("#daysInput").val();
+    var days = parseInt(daysInput);
 
-    //Validate and process the data
+    //Validate the data
+    if (daysInput == "") {
+        alert("Please provide a number of Days!");
+        $("#daysInput").focus();
+        return false;
+    }
+    if (query == "") {
+        alert("Please enter a Query!");
+        $("#keywordsInput").focus();
+        return false;
+    }
+
+    //Process the data ready to be sent to the server
     var since = findDate(days);
     var params = {query: query, from: from, lat: lat, lon: lon, since: since}
-    console.log(days);
+    console.log(query);
     console.log(since);
 
     //Send a POST request to the server and display the results

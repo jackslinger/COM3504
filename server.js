@@ -61,36 +61,33 @@ var app = protocol.createServer(function (req, res) {
             }
         });
         req.on('end', function () {
-            //console.log(body);
-
             var formData = JSON.parse(body);
             
+            //Create a variable to store the twitter query
             var query = formData.query;
 
+            //Add the since paramiter
             if (formData.since != "") {
                 query = query + " since:" + formData.since;
             }
 
-            // if (formData.source != "") {
-            //     query = query + " source:" + formData.source;
-            // }
-
+            //If from is specified then only look for tweets from that user
             if (formData.from != "") {
                 query = query + " from:" + formData.from;
             }
 
+            //Do not include retweets in the search
             query = query + " -filter:retweets";
-            console.log(query);
 
             var params = { q: query, lang: 'en', count: 100 };
 
+            //If both lat and long are set then create the geocode
             if (formData.lat != "" & formData.long != "") {
                 var geocode = formData.lat + "," + formData.long + ",5mi";
                 params.geocode = geocode;
             }
 
-            var tweetsJSON = '';
-
+            //Make a call to twitter
             client.get('search/tweets', params,
             function(err, data, response) {       
                 //Store user to database
@@ -101,7 +98,8 @@ var app = protocol.createServer(function (req, res) {
                     storeUserData(user);
                 }
 
-                tweetsJSON = JSON.stringify(data);
+                //Return the tweets in JSON format
+                var tweetsJSON = JSON.stringify(data);
                 res.end(tweetsJSON);
             });
             

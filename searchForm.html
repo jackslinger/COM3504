@@ -40,20 +40,28 @@
 
 <h1>Tracking Discussions</h1>
 
-<form id="myForm", onsubmit="return false;">
+<p>This page is designed to allow you to retrieve upto 100 tweets about a given topic within a set number of days.
+This is one of the simplest parts of the site with sends the data from the form to twitters search API and returns
+the tweets recieved.</p>
+
+<p>The From field is optional and causes the system to look only for tweets from a particular twitter user.
+The Latitude and Longitude fields are optional, if both are filled in, the search returns only tweets within 5
+miles of that location by useing the tweets geocode.</p>
+
+<form id="searchForm", onsubmit="sendData; return false;">
     Keywords: <br>
     <input id="keywordsInput" type="text" name="query" value="">
     <br>
     How many Days ago: <br>
     <input id="daysInput" type="number" min="1" step="1" name="since" value="">
     <br>
-    From: <br>
+    From (optional): <br>
     <input id="fromInput" type="text" name="from" value="">
     <br>
-    Latitude: <br>
+    Latitude (optional): <br>
     <input id="latInput" type="text" name="lat" value="">
     <br>
-    Longitude: <br>
+    Longitude (optional): <br>
     <input id="lonInput" type="text" name="long" value="">
     <br>
     <br>
