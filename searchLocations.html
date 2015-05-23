@@ -59,6 +59,17 @@
 
 <h1>Find the Venues Visted by a User</h1>
 
+<p>This page uses both twitter and foursqaure to find all of the foursqaure venues that a user
+has checked into in the last so many days. Because foursqaure does not provide an API that allows this
+kind of search, twitter is used as an intermediate step. The first step is to make a twitter API call to retreive
+all of the tweets published by the foursquare app from that users account, then the server finds any
+swarm app codes in the tweets. These codes are then used to retrieve the foursquare checkin object using a
+call to the foursquare API. All of these steps take place on the server side requiring only one call to the
+server from the client.</P>
+
+<p>If the number of days is set to zero then the twitter streaming API is used to look for swarm codes
+instead of a normal twitter search. Socket.io is used to emit the venues that are found to the page.</p>
+
 <form id="myForm", onsubmit="return false;">
     Twitter Screen name: <br>
     <input id="screenNameInput" type="text" name="query" value="">
