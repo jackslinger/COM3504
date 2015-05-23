@@ -5,6 +5,7 @@
     <title>Track User</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link href="application.css" rel="stylesheet">
+    <link rel="icon" type="image/icon" href="/favicon.ico">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script src="findLocations.js"></script>
@@ -21,11 +22,16 @@
 
         });
     </script>
+    <script type="text/javascript">
+        window.onload=function () {
+            $('#trackuser').addClass('active');
+        };
+    </script>
 </head>
 
 <body>
 
-<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+<nav id="custom-bootstrap-menu" class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -38,12 +44,12 @@
     </div>
     <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
-            <li class="active"><a href="searchForm.html">1.a Tracking Discussions</a></li>
-            <li class="active"><a href="searchKeywords.html">2.a Topic Finder</a></li>
-            <li class="active"><a href="searchLocations.html">2.b Track User</a></li>
-            <li class="active"><a href="searchVisitors.html">2.c Find Visitors</a></li>
-            <li class="active"><a href="viewUser.html">View Users in Database</a></li>
-            <li class="active"><a href="viewVenue.html">View Venues in Database</a></li>
+            <li><a href="searchForm.html">1.a Tracking Discussions</a></li>
+            <li><a href="searchKeywords.html">2.a Topic Finder</a></li>
+            <li id="trackuser"><a href="searchLocations.html">2.b Track User</a></li>
+            <li><a href="searchVisitors.html">2.c Find Visitors</a></li>
+            <li><a href="viewUser.html">View Users in Database</a></li>
+            <li><a href="viewVenue.html">View Venues in Database</a></li>
         </ul>
     </div>
   </div>
@@ -65,7 +71,7 @@
 </form>
 
 </div>
-
+<br>
 <div class="container" xmlns="http//localhost:3000/ontology.xml/#">
     <table class="table table-condensed" id="venueTable" style="width:100%">
         <thead>
