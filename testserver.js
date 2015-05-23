@@ -46,6 +46,14 @@ process.on("exit", function() {
 var file = new (static.Server)();
 var portNo = 3000;
 var app = protocol.createServer(function (req, res) {
+
+    var io = require('socket.io')(app);
+    io.on('connection', function (socket) {
+
+    var stream = client.stream('statuses/filter', {track: 'sheffield', language: 'en'})
+
+    stream.on('tweet', function (tweet) {
+
     var pathname = url.parse(req.url).pathname;
     if ((req.method == 'POST') && (pathname == '/search.html')) {
         var body = '';
@@ -264,23 +272,14 @@ var app = protocol.createServer(function (req, res) {
 
             console.log(formData.days);
             if (formData.days == 0) {
-                var io = require('socket.io')(app);
-
-                console.log("Connecting");
-                console.log(formData.screenname)
-
-
-                io.on('connection', function (socket) {
-                  console.log('Connected');
 
                   client.get('users/show', { screen_name: formData.screenname, lang: 'en', count: 10 },
                       function(err, data, response) { 
                           var userID = data.id
 
                           // stream built using the userID
-                          var stream = client.stream('statuses/filter', {follow: userID, language: 'en'})
+                          stream = client.stream('statuses/filter', {follow: userID, language: 'en'})
 
-                          stream.on('tweet', function (tweet) {
                               // Only shows tweets which originate from foursquare
                               if (tweet.source.split(/"/)[1] == "http://foursquare.com") {
 
@@ -300,7 +299,7 @@ var app = protocol.createServer(function (req, res) {
                                               headers: headers,
                                               qs: {'shortId' : swarmCode, 'oauth_token' : 'ONYO0JUQTC1NBSE3IXRZ1A1NKSKQHJGFW1IB4JRDTBTH5ODY',
                                               'v' :'20140806', m: 'swarm'}
-                                          }
+                                        }
 
                                           request(options,
                                               function (error, response, body) {
@@ -366,14 +365,14 @@ var app = protocol.createServer(function (req, res) {
                                                       
                                                   }
                                                   else console.log('error: '+error + ' status: '+response.statusCode);
-                                          })
-                                      }
-                                  }
+                                          });
+                                    }
+                                }
 
-                              }
-                          })
-                      });
-                });
+                        }
+                          
+                    });
+                
             } else {
 
                 var tweetsJSON = '';
@@ -488,14 +487,7 @@ var app = protocol.createServer(function (req, res) {
             var geocode = formData.lat + "," + formData.lon + ",20mi"
             
             if (formData.days == 0) {
-                var io = require('socket.io')(app);
 
-                console.log("Connecting");
-
-                io.on('connection', function (socket) {
-                    console.log("Connected")
-
-                    var stream = "";
                     var location = '';
 
                     if (formData.lat != "" && formData.lon != "") {
@@ -511,7 +503,6 @@ var app = protocol.createServer(function (req, res) {
                         stream = client.stream('statuses/filter', {track: formData.location, language: 'en'})
                     }
 
-                    stream.on('tweet', function (tweet) {
                         // Only shows tweets which originate from foursquare
                         if (tweet.source.split(/"/)[1] == "http://foursquare.com") {
 
@@ -530,8 +521,6 @@ var app = protocol.createServer(function (req, res) {
                             socket.emit('stream', row);
 
                         }
-                    });
-                });
             } else {
 
                 var params = { q: query, lang: 'en', count: 10 };
@@ -950,6 +939,8 @@ var app = protocol.createServer(function (req, res) {
             }
         });
     }
+    })
+    });
 }).listen(portNo);
 
 
