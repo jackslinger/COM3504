@@ -40,8 +40,29 @@
 
 	<div class="container">
 
+	<h1>Retweets</h1>
+
+	<p>This page displays up to 10 retweets of the given users tweet. As can be seen from the address
+	bar, the tweet ID is passed to this page via the query string.</p>
+
+	<br>
+
+	<table class="table table-condensed" id="userTable" style="width:100%">
+		<thead>
+			<th>Profile Picture</th>
+			<th>Name</th>
+			<th>Twitter Screen Name</th>
+			<th>Home Location</th>
+			<th>Description</th>
+		</thead>
+		<tbody id="userTableBody">
+		
+		</tbody>
+	</table>
+
+	<br>
+
 	<table class="table table-condensed" id="retweetTable" style="width:100%">
-	  <tr>
 	    <thead>
 	        <th>Created at</th>
 	        <th>Screen Name</th> 
@@ -51,7 +72,6 @@
 	    <tbody id="retweetTableBody">
 	        
 	    </tbody>    
-	  </tr>
 	</table>
 
 	</div>
