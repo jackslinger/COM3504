@@ -3,19 +3,25 @@ $(document).ready(function() {
         sendData();
     });
     $("#loading").hide();
+    $("#streaming").hide();
 });
 
 function sendData() {
     //Clear any existing data
     clearData();
 
-    //Show the loading text
-    $("#loading").show();
-
 	//Get data from form
 	var screenName = $('#screenNameInput').val();
     var daysInput = $('#daysInput').val();
     var days = parseInt(daysInput);
+
+    if (days > 0) {
+        //Show the loading text
+        $("#loading").show();
+    } else {
+        //Show streaming text
+        $("#streaming").show();
+    }
 
     //Validate the input
     if (screenName == "") {
