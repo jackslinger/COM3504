@@ -97,8 +97,8 @@ var app = protocol.createServer(function (req, res) {
             var params = { q: query, lang: 'en', count: 100 };
 
             //If both lat and long are set then create the geocode
-            if (formData.lat != "" & formData.long != "") {
-                var geocode = formData.lat + "," + formData.long + ",5mi";
+            if (formData.lat != "" & formData.lon != "") {
+                var geocode = formData.lat + "," + formData.lon + ",5mi";
                 params.geocode = geocode;
             }
 
