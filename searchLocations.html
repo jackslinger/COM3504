@@ -15,11 +15,6 @@
         var socket = io();
         socket.on('stream', function(venue){
          $('#venueTableBody').append(venue +'<br>');
-        
-        $('#dcButton').click(function(){
-            socket.emit('disconnect', row);
-        });
-
         });
     </script>
     <script type="text/javascript">
@@ -79,7 +74,9 @@ instead of a normal twitter search. Socket.io is used to emit the venues that ar
     <br>
     <br>
     <button id="sendButton">Send Data</button>
+    <br></br>
     <p id="loading">Sending Query Please Wait.</p> 
+    <p id="streaming">Now streaming.</p> 
 </form>
 
 </div>

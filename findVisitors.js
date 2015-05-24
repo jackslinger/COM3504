@@ -1,20 +1,26 @@
 $(document).ready(function() {
 	$("#sendButton").click(sendData);
     $("#loading").hide();
+    $("#streaming").hide();
 });
 
 function sendData() {
     //Clear any remaining data
     clearData();
 
-    //Show the loading text
-    $("#loading").show();
-
 	//Get data from form
 	var location = $("#locationInput").val();
 	var lat = $("#latInput").val();
 	var lon = $("#longInput").val();
 	var days = parseInt($('#daysInput').val());
+
+    if (days > 0) {
+        //Show the loading text
+        $("#loading").show();
+    } else {
+        //Show streaming text
+        $("#streaming").show();
+    }
 
 	//Validate and process the input
     var since = findDate(days);
