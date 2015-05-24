@@ -271,108 +271,104 @@ var app = protocol.createServer(function (req, res) {
 
 
                 io.on('connection', function (socket) {
-                  console.log('Connected');
+                    console.log('Connected');
 
-                  client.get('users/show', { screen_name: formData.screenname, lang: 'en', count: 10 },
-                      function(err, data, response) { 
-                          var userID = data.id
+                    client.get('users/show', { screen_name: formData.screenname, lang: 'en', count: 10 },
+                        function(err, data, response) { 
+                            var userID = data.id
 
-                          // stream built using the userID
-                          var stream = client.stream('statuses/filter', {follow: userID, language: 'en'})
+                            // stream built using the userID
+                            var stream = client.stream('statuses/filter', {follow: userID, language: 'en'})
 
-                          stream.on('tweet', function (tweet) {
-                              // Only shows tweets which originate from foursquare
-                              if (tweet.source.split(/"/)[1] == "http://foursquare.com") {
+                            stream.on('tweet', function (tweet) {
+                            // Only shows tweets which originate from foursquare
+                            if (tweet.source.split(/"/)[1] == "http://foursquare.com") {
 
-                                  for (var index in tweet.entities.urls) {
+                                for (var index in tweet.entities.urls) {
 
-                                      var swarmUrl=tweet.entities.urls[index].display_url
+                                    var swarmUrl=tweet.entities.urls[index].display_url
 
-                                      var testUrl = (swarmUrl.substring(0,15));
+                                    var testUrl = (swarmUrl.substring(0,15));
 
-                                      if (testUrl == "swarmapp.com/c/") {
+                                    if (testUrl == "swarmapp.com/c/") {
 
-                                          var swarmCode = swarmUrl.substring(15, 26);
+                                        var swarmCode = swarmUrl.substring(15, 26);
 
-                                          var options = {
-                                              url: 'https://api.foursquare.com/v2/checkins/resolve',
-                                              method: 'GET',
-                                              headers: headers,
-                                              qs: {'shortId' : swarmCode, 'oauth_token' : 'ONYO0JUQTC1NBSE3IXRZ1A1NKSKQHJGFW1IB4JRDTBTH5ODY',
-                                              'v' :'20140806', m: 'swarm'}
-                                          }
+                                        var options = {
+                                            url: 'https://api.foursquare.com/v2/checkins/resolve',
+                                            method: 'GET',
+                                            headers: headers,
+                                            qs: {'shortId' : swarmCode, 'oauth_token' : 'ONYO0JUQTC1NBSE3IXRZ1A1NKSKQHJGFW1IB4JRDTBTH5ODY',
+                                            'v' :'20140806', m: 'swarm'}
+                                        }
 
-                                          request(options,
-                                              function (error, response, body) {
-                                                  if (!error && response.statusCode == 200) {
-                                                      // Print out the response body
-                                                      var raw = JSON.parse(body);
+                                        request(options,
+                                            function (error, response, body) {
+                                                if (!error && response.statusCode == 200) {
+                                                    // Print out the response body
+                                                    var raw = JSON.parse(body);
 
-                                                      var venue = raw.response.checkin.venue;
+                                                    var venue = raw.response.checkin.venue;
 
-                                                      var venueid = venue.id;
+                                                    var venueid = venue.id;
 
-                                                      var name = venue.name;
-                                                      var cat = venue.categories[0].name;
-                                                      var address = "";
-                                                      if (venue.location.formattedAddress != null) {
+                                                    var name = venue.name;
+                                                    var cat = venue.categories[0].name;
+                                                    var address = "";
+                                                    if (venue.location.formattedAddress != null) {
                                                         address = venue.location.formattedAddress[0];
-                                                      } else {
+                                                    } else {
                                                         address = "No address available";
-                                                      }
+                                                    }
 
-                                                      var options = {
-                                                            url: 'https://api.foursquare.com/v2/venues/' + venueid,
-                                                            method: 'GET',
-                                                            headers: headers,
-                                                            qs: {'VENUE_ID' : venueid, 'oauth_token' : 'ONYO0JUQTC1NBSE3IXRZ1A1NKSKQHJGFW1IB4JRDTBTH5ODY',
-                                                            'v' :'20140806', m: 'swarm'}
-                                                        }
+                                                    var options = {
+                                                        url: 'https://api.foursquare.com/v2/venues/' + venueid,
+                                                        method: 'GET',
+                                                        headers: headers,
+                                                        qs: {'VENUE_ID' : venueid, 'oauth_token' : 'ONYO0JUQTC1NBSE3IXRZ1A1NKSKQHJGFW1IB4JRDTBTH5ODY',
+                                                        'v' :'20140806', m: 'swarm'}
+                                                    }
 
-                                                        request(options,
-                                                            function (error, response, body) {
-                                                                if (!error && response.statusCode == 200) {
-                                                                    // Print out the response body
-                                                                    var raw = JSON.parse(body);
+                                                    request(options,
+                                                        function (error, response, body) {
+                                                            if (!error && response.statusCode == 200) {
+                                                                // Print out the response body
+                                                                var raw = JSON.parse(body);
 
-                                                                    var fullvenue = raw.response.venue;
+                                                                var fullvenue = raw.response.venue;
 
-                                                                    var description = fullvenue.description;
+                                                                var description = fullvenue.description;
 
-                                                                    if (description == null) {
-                                                                        description = "No description available";
-                                                                    }
-
-                                                                    var url = "<a href='" + fullvenue.shortUrl + "'>" + fullvenue.shortUrl + "</a>";
-                                                                    var pic = "";
-
-                                                                    if (fullvenue.bestPhoto != null) {
-                                                                        pic = "<img src=\"" + fullvenue.bestPhoto.prefix + "width150" + fullvenue.bestPhoto.suffix + "\">";
-                                                                    } else {
-                                                                        pic = "No picture available";
-                                                                    }
-
-                                                                    var venuelat = fullvenue.location.lat;
-                                                                    var venuelng = fullvenue.location.lng;
-                                                                    var venuelatlng = venuelat+","+venuelng
-
-                                                                    var row = "<tr><td>"+name+"</td><td>"+cat+"</td><td>"+address+"</td><td>"+description+"</td><td>"+url+"</td><td>"+pic+"</td></tr>"
-                                                                    socket.emit('stream', row);
+                                                                if (description == null) {
+                                                                    description = "No description available";
                                                                 }
-                                                                else console.log('error: '+error + ' status: '+response.statusCode);
-                                                      });
 
+                                                                var url = "<a href='" + fullvenue.shortUrl + "'>" + fullvenue.shortUrl + "</a>";
+                                                                var pic = "";
 
-                                                      
-                                                  }
-                                                  else console.log('error: '+error + ' status: '+response.statusCode);
-                                          })
-                                      }
-                                  }
+                                                                if (fullvenue.bestPhoto != null) {
+                                                                    pic = "<img src=\"" + fullvenue.bestPhoto.prefix + "width150" + fullvenue.bestPhoto.suffix + "\">";
+                                                                } else {
+                                                                    pic = "No picture available";
+                                                                }
 
-                              }
-                          })
-                      });
+                                                                var venuelat = fullvenue.location.lat;
+                                                                var venuelng = fullvenue.location.lng;
+                                                                var venuelatlng = venuelat+","+venuelng
+
+                                                                var row = "<tr><td>"+name+"</td><td>"+cat+"</td><td>"+address+"</td><td>"+description+"</td><td>"+url+"</td><td>"+pic+"</td></tr>"
+                                                                socket.emit('stream', row);
+                                                            }
+                                                            else console.log('error: '+error + ' status: '+response.statusCode);
+                                                    });
+                                                }
+                                                else console.log('error: '+error + ' status: '+response.statusCode);
+                                        })
+                                    }
+                                }
+                            }
+                        })
+                    });
                 });
             } else {
 
