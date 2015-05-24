@@ -1,10 +1,14 @@
 $(document).ready(function() {
 	$("#sendButton").click(sendData);
+    $("#loading").hide();
 });
 
 function sendData() {
     //Clear any remaining data
     clearData();
+
+    //Show the loading text
+    $("#loading").show();
 
 	//Get data from form
 	var location = $("#locationInput").val();
@@ -16,13 +20,14 @@ function sendData() {
     var since = findDate(days);
     var query = {location: location, lat: lat, lon: lon, since: since, days: days};
 
-    console.log(location);
-    console.log(query);
-
     $.post("findVisitors.html", JSON.stringify(query), function(data) {
 		console.log(data);
 
         var users = JSON.parse(data);
+
+        if (users.length == 0) {
+            alert("No visitors found.");
+        }
 
         for (var index in users) {
             var user = users[index];
@@ -41,6 +46,9 @@ function sendData() {
             var link = "<a href='timeline.html?screenname=" + user.screen_name + "'>Timeline</a>";
             row.insertCell(5).innerHTML = link;
         }
+
+        //Hide the loading text again
+        $("#loading").hide();
 	});
 }
 

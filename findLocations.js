@@ -2,11 +2,15 @@ $(document).ready(function() {
 	$("#sendButton").click(function() {
         sendData();
     });
+    $("#loading").hide();
 });
 
 function sendData() {
     //Clear any existing data
     clearData();
+
+    //Show the loading text
+    $("#loading").show();
 
 	//Get data from form
 	var screenName = $('#screenNameInput').val();
@@ -34,7 +38,11 @@ function sendData() {
 
 		var venues = JSON.parse(data);
 
-        loadMap(venues);
+        if (venues.length == 0) {
+            alert("No locations found.");
+        } else {
+            loadMap(venues);
+        }
 
 		for (var index in venues) {
             var venue = venues[index].response.venue;
@@ -101,6 +109,8 @@ function sendData() {
             row.insertCell(6).innerHTML = interestLink;
         }
 
+        //Hide the loading text again
+        $("#loading").hide();
         
 	});
 }
