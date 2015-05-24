@@ -47,6 +47,11 @@ function clearData() {
 
 function populateTable(tweets) {
     clearData();
+
+    if (tweets.length == 0) {
+        alert("No tweets found.");
+    }
+
     for (var index in tweets) {
         var tweet = tweets[index];
             
