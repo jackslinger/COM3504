@@ -437,7 +437,10 @@ var app = protocol.createServer(function (req, res) {
                                     stored.picture_url = venue.bestPhoto.prefix + "width150" + venue.bestPhoto.suffix;
                                 }
 
-                                stored.category = venue.categories[0].name;
+                                if (venue.categories.length > 0) {
+                                    stored.category = venue.categories[0].name;
+                                }
+                                
                                 stored.url = venue.shortUrl;
                                 stored.description = venue.description;
                                 stored.address = address;
