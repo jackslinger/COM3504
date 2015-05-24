@@ -61,7 +61,7 @@ function populateTable(tweets) {
         var link = "No retweets avalible"
 
         if (retweetCount > 0) {
-            link = "<a href='retweets.html?id=" + tweet.id_str + "'>retweets</a>";
+            link = "<a href='retweets.html?id=" + tweet.id_str + "' target='_blank'>retweets</a>";
         }
         
         row.insertCell(4).innerHTML = link;

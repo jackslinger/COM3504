@@ -34,10 +34,21 @@ function findParams(queryString) {
 }
 
 function populateTable(tweets) {
-	console.log("Working");
-	console.log(tweets);
+	if (tweets.length > 0) {
+		var user = tweets[0].retweeted_status.user;
+	
+		var userTableBody = document.getElementById("userTableBody");
+	    var userRow = userTableBody.insertRow(0);
+	    var image = "<img src='" + user.picture_url + "'>";
+	    userRow.insertCell(0).innerHTML = image;
+	    userRow.insertCell(1).innerHTML = user.name;
+	    userRow.insertCell(2).innerHTML = user.screen_name;
+	    userRow.insertCell(3).innerHTML = user.location;
+	    userRow.insertCell(4).innerHTML = user.description;
+
+	}
+
 	for (var index in tweets) {
-		console.log(tweets[index]);
         var tweet = tweets[index];
             
         var tableBody = document.getElementById("retweetTableBody");

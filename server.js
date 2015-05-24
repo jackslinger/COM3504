@@ -16,12 +16,14 @@ var headers = {
 'Content-Type': 'application/x-www-form-urlencoded'
 }
 
-var connection = mysql.createConnection({
+var connectionConfig = {
     host: 'stusql.dcs.shef.ac.uk',
     user: 'aca12jms',
     password: '5a4e12e9',
     database: 'aca12jms'
-});
+}
+
+var connection = mysql.createConnection(connectionConfig);
 
 var Twit = require('twit');
 var client = new Twit({
@@ -32,6 +34,19 @@ var client = new Twit({
 });
 
 connection.connect();
+
+connection.on('error', function(err) {
+    if (!err.fatal) {
+        return;
+    }
+
+    if (err.code == 'PROTOCOL_CONNECTION_LOST') {
+        console.log("Re connecting lost connection.");
+
+        connection = mysql.createConnection(connectionConfig);
+        connection.connect();
+    }
+});
 
 process.on( 'SIGINT', function() {
   console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
