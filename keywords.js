@@ -8,6 +8,7 @@ var since = "";
 
 $(document).ready(function() {
 	$("#sendButton").click(validateInput);
+    $("#loading").hide();
 
 	//stopwords from http://xpo6.com/list-of-english-stop-words/
 	stopwords = new Set(["a", "about", "above", "above", "across", "after", "afterwards", "again", "against", "all", "almost", "alone", "along", "already", "also",
@@ -53,6 +54,9 @@ $.fn.serializeObject = function () {
 function validateInput() {
     clearData();
     console.log("Validating input");
+
+    //Show the loading text
+    $("#loading").show();
 
     //Initiilize the total wordcount for use later
     wordCount["total"] = {};
@@ -150,7 +154,8 @@ function sendData() {
             }
         }
 
-        //console.log(keywords);
+        //Hide the loading text again
+        $("#loading").hide();
     });
 
     var tableHead = $("#keywordTableHead");

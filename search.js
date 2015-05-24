@@ -4,6 +4,7 @@
 
 $(document).ready(function() {
     $("#sendButton").click(sendData);
+    $("#loading").hide();
 });
 
 function sendData() {
@@ -32,6 +33,9 @@ function sendData() {
     var params = {query: query, from: from, lat: lat, lon: lon, since: since}
     console.log(query);
     console.log(since);
+
+    //Show the loading text
+    $("#loading").show();
 
     //Send a POST request to the server and display the results
     $.post("/search.html", JSON.stringify(params), function(data) {
@@ -71,6 +75,9 @@ function populateTable(tweets) {
         
         row.insertCell(4).innerHTML = link;
     }
+
+    //Hide the loading text again
+    $("#loading").hide();
 }
 
 function findDate(days) {
